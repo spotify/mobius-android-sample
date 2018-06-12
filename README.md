@@ -1,81 +1,50 @@
-# TODO-MVP-RXJAVA
+# TODO-MOBIUS
 
 ### Summary
 
-This sample is based on the TODO-MVP project and uses RxJava 2 for communication between the data model and presenter layers.
+This sample is based on the [TODO-MVP-RXJAVA](https://github.com/googlesamples/android-architecture/tree/todo-mvp-rxjava) project from the Android Architecture Blueprints repository. It converts the code from MVP using RxJava to a [Mobius](https://github.com/spotify/mobius) implementation.
 
-Compared to the TODO-MVP, both the Presenter contracts and the implementation of the Views stay the same. The changes are done to the data model layer and in the implementation of the Presenters. For the sake of simplicity we decided to keep the RxJava usage minimal, leaving optimizations like RxJava caching aside.
+Compared to the TODO-MVP-RXJAVA, this project implements all business logic and presentation logic as pure functions, and utilizes Mobius to manage state and side-effects. Presenters are called ViewDataMappers and they are pure functions that accept `Model` instances and return `ViewData` objects that are then bound to the UI. Furthermore, views were extracted into separate classes used by fragments. Data Source implementations were reused.
 
-The data model layer exposes RxJava 2 [Flowable](http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Flowable.html) streams as a way of retrieving tasks. The ``TasksDataSource`` interface contains methods like:
+The ``TasksRepository`` class has been removed as its responsibility is achieved using a Mobius update function.
 
+The project contains four features. Each feature's implementation is a little unique to show the different approaches to modeling in Mobius. Here are the highlights:
+* Tasks List: This uses a Data class as the `Model`. It also has a `ViewData` class that encapsulates what the view should render. A pure function that maps `Model` instances to `ViewData` ones is applied for every `Model` update and the resulting `ViewData` object is passed to the View for rendering.
+* Add/Edit Task: Also uses a Data class as the `Model` but binds that model directly to the View without the need for `ViewData`
+* Task Details: Same as Tasks List
+* Statistics: This uses a Sum Type as the `Model` to represent the different states.
+
+Each feature is divided into the following package structure:
+- featurename.domain: Contains all things describing the domain of the feature. The definition of the ``Model``, Logic (``Init``/``Update`` functions), ``Event``s and ``Effect``s that describe the feature.
+- featurename.effecthandlers: Contains the definition of all effect handlers that execute effects the logic functions dispatch.
+- featurename.view: Contains all things that have to do with presentation logic (i.e. ViewDataMappers), the definition of ViewData types, and the views implementation.
+- featurename: Contains the feature's Fragment/Activity that is responsible for creating a ``MobiusLoop.Controller``, connecting it to the View and managing it.
+
+Features in this project treat `Fragment`s as builders that are only responsible for managing lifecycle and creating dependencies. Each `Fragment` creates a `MobiusLoop.Controller` and connects it to the view, which is now a separate `Views` class, owned by the `Fragment`. Once a `MobiusLoop.Controller` is started, it'll start the `MobiusLoop` which kicks things off by invoking the `Init` function. The `Init` and `Update` functions define how state should evolve and what effects should happen. The UI is purely derived from the representation of state, i.e. the `Model`. There are helper methods that turn `Model`s into `Bundle`s and vice versa. These are used for state restore.
+
+Mobius uses a computation thread to process events, i.e. invoke `Init`/`Update` functions. This thread is synchronized and events are processed one at a time. It also utilizes an `ExecutorService` to process effects returned by the logic functions. `MobiusLoop.Controller` makes sure `Model` updates are delivered on the main thread for rendering.
+
+There's a helper builder accessible through `RxMobius.subtypeEffectHandler()` that allows you to specify an effect handler per effect type. Here's the definition of the effect handlers for the AddEditTask feature
 ```java
-Flowable<List<Task>> getTasks();
-
-Flowable<Optional<Task>> getTask(@NonNull String taskId);
+ObservableTransformer<AddEditTaskEffect, AddEditTaskEvent> effectHandler =
+     RxMobius.<AddEditTaskEffect, AddEditTaskEvent>subtypeEffectHandler()
+       .addAction(NotifyEmptyTaskNotAllowed.class, showEmptyTaskError, mainThread()) // where showEmptyTaskError is an Action implementation
+       .addAction(Exit.class, showTasksList, mainThread()) // where showTasksList is an Action implementation
+       .addFunction(CreateTask.class, createTaskHandler(remoteSource, localSource)) // where createTaskHandler returns an Function<CreateTask, AddEditTaskEvent>
+       .addFunction(SaveTask.class, saveTaskHandler(remoteSource, localSource)) //where saveTaskHandler returns an Function<SaveTask, AddEditTaskEvent>
+       .build();
 ```
-
-A major difference between RxJava 1 and 2 is that streams no longer support the propagation of null items, so we are using Guava's [Optional](https://google.github.io/guava/releases/19.0/api/docs/com/google/common/base/Optional.html).
-
-To get a better understanding of the differences between RxJava 1 and RxJava 2 see [_What's different in 2.0_](https://github.com/ReactiveX/RxJava/wiki/What%27s-different-in-2.0) and the [pull request](https://github.com/googlesamples/android-architecture/pull/420) to migrate this branch to RxJava 2. To browse the code with RxJava 1, see the [last commit before the migration](https://github.com/googlesamples/android-architecture/tree/01a248f874dad42cede2297816bcee1c73ae0b9b).
-
-This is implemented in ``TasksLocalDataSource`` with the help of [SqlBrite](https://github.com/square/sqlbrite). The result of queries to the database being easily exposed as streams of data.
-
-```java
-@Override
-public Observable<List<Task>> getTasks() {
-    ...
-    return mDatabaseHelper.createQuery(TaskEntry.TABLE_NAME, sql)
-            .mapToList(mTaskMapperFunction);
-}
-```
-
-The ``TasksRepository`` combines the streams of data from the local and the remote data sources, exposing it to whoever needs it. In our project, the Presenters and the unit tests are actually the consumers of these ``Flowable``s.
-
-The Presenters subscribe to the ``Flowable``s from the ``TasksRepository`` and after manipulating the data, they are the ones that decide what the views should display, in the ``.subscribe(...)`` method. Also, the Presenters are the ones that decide on the working threads. For example, in the ``StatisticsPresenter``, we decide on which thread we should do the computation of the active and completed tasks and what should happen when this computation is done: show the statistics, if all is ok; show loading statistics error, if needed; and telling the view that the loading indicator should not be visible anymore.
-
-```java
-...
-Disposable disposable = Flowable
-    .zip(completedTasks, activeTasks, new BiFunction<Long, Long, Pair<Long, Long>>() {
-        @Override
-        public Pair<Long, Long> apply(Long completed, Long active) throws Exception {
-            return Pair.create(active, completed);
-        }
-     })
-     .subscribeOn(mSchedulerProvider.computation())
-     .observeOn(mSchedulerProvider.ui())
-     .subscribe(
-         new Consumer<Pair<Long, Long>>() {
-             @Override
-             public void accept(Pair<Long, Long> stats) throws Exception {
-                 mStatisticsView.showStatistics(stats.first, stats.second),
-             }
-         },
-         new Consumer<Throwable>() {
-             @Override
-             public void accept(Throwable throwable) throws Exception {
-                 mStatisticsView.showLoadingStatisticsError();
-             }
-         },
-         new Action() {
-             @Override
-             public void run() throws Exception {
-                 mStatisticsView.setProgressIndicator(false);
-             }
-     });
-```
-
-Handling of the working threads is done with the help of RxJava's `Scheduler`s. For example, the creation of the database together with all the database queries is happening on the IO thread. The `subscribeOn` and `observeOn` methods are used in the Presenter classes to define that the `Flowable`s will operate on the computation thread and that the observing is on the main thread.
+For more information about Effect Handlers, please refer to the [Mobius Wiki](https://github.com/spotify/mobius/wiki/Mobius-and-RxJava#rxmobiussubtypeeffecthandler)
 
 ### Dependencies
 
+* [Mobius 1.2.0](https://github.com/spotify/mobius)
+* [DataEnum 1.3.1](https://github.com/spotify/DataEnum)
+* [AutoValue 1.6.0](https://github.com/google/auto/tree/master/value)
+* [HamcrestPojo 1.1.1](https://github.com/spotify/java-hamcrest)
 * [RxJava 2.x](https://github.com/ReactiveX/RxJava)
 * [RxAndroid 2.x](https://github.com/ReactiveX/RxAndroid)
 * [SqlBrite 2.x](https://github.com/square/sqlbrite)
-
-### Java 8 Compatibility
-
-This project uses [lambda expressions](https://docs.oracle.com/javase/tutorial/java/javaOO/lambdaexpressions.html) extensively, one of the features of [Java 8](https://developer.android.com/guide/platform/j8-jack.html). To check out how the translation to lambdas was made, check out [this commit](https://github.com/googlesamples/android-architecture/pull/240/commits/929f63e3657be8705679c46c75e2625dc44a5b28), where lambdas and the Jack compiler were enabled.
 
 ## Features
 
@@ -83,36 +52,25 @@ This project uses [lambda expressions](https://docs.oracle.com/javase/tutorial/j
 
 #### Use of architectural frameworks/libraries/tools:
 
-Building an app with RxJava is not trivial as it uses new concepts.
+Mobius simplifies building of business logic by turning it into a synchronous pure function.
 
 #### Conceptual complexity
 
-Developers need to be familiar with RxJava, which is not trivial.
+A couple of new concepts that need to be learned such as Pure functions and Sum Types.
 
 ### Testability
 
 #### Unit testing
 
-Very High. Given that the RxJava ``Flowable``s are highly unit testable, unit tests are easy to implement.
+Very High. For the following reasons:
+* Logic is written as pure functions which are the easiest form of functions to test. Consequently tests can be written in a BDD behavior specification style. Furthermore, TDD becomes a lot simpler since there's no need for mocks/fakes/stubs.
+* Each effect handler has a single responsibility and the least amount of logic needed to perform the requested effect. This makes them a lot simpler and consequently easier to reason about and test.
 
 #### UI testing
+UI testing can be split into two categories of tests:
+* Presenatation: Since presentation logic is also defined as a Pure function, testing it becomes very simple.
+* View: Same as TODO-MVP-RXJAVA. This implementation does not change anything with regards to integration/end to end testing.
 
-Similar with TODO-MVP
-
-### Code metrics
-
-Compared to TODO-MVP, new classes were added for handing the ``Schedulers`` that provide the working threads.
-
-```
--------------------------------------------------------------------------------
-Language                     files          blank        comment           code
--------------------------------------------------------------------------------
-Java                            48           1118           1422           3639 (3450 in MVP)
-XML                             35             97            337            952
--------------------------------------------------------------------------------
-SUM:                            83           1215           1759           4591
-
-```
 ### Maintainability
 
 #### Ease of amending or adding a feature
@@ -121,9 +79,18 @@ High.
 
 #### Learning cost
 
-Medium as RxJava is not trivial.
+* Low as Pure functions are easy to write/test
+* Medium as RxJava is not trivial. There are, however, several utilities in the framework that help build RxJava chains for users. It's worth mentioning that Mobius as a framework can also be used in apps that do not utilize RxJava.
 
 ## External contributors
+Mobius Implementation:
+* [Ahmed Nawara](https://github.com/anawara)
+* [Petter Måhlén](https://github.com/pettermahlen)
 
+Original Implementation:
 * [Voicu Klein](https://github.com/kleinsenberg)
 * [Erik Hellman](https://github.com/erikhellman)
+
+This project adheres to the [Open Code of Conduct][code-of-conduct]. By participating, you are expected to honor this code.
+
+[code-of-conduct]: https://github.com/spotify/code-of-conduct/blob/master/code-of-conduct.md

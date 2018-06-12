@@ -1,5 +1,6 @@
 /*
  * Copyright 2016, The Android Open Source Project
+ * Copyright (c) 2017-2018 Spotify AB
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,103 +14,114 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.example.android.architecture.blueprints.todoapp.addedittask;
+
+import static com.example.android.architecture.blueprints.todoapp.addedittask.AddEditTaskInjector.createController;
+import static com.example.android.architecture.blueprints.todoapp.addedittask.effecthandlers.AddEditTaskEffectHandlers.createEffectHandlers;
+import static com.example.android.architecture.blueprints.todoapp.addedittask.view.AddEditTaskModeBundlePacker.addEditTaskModelToBundle;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
-
 import com.example.android.architecture.blueprints.todoapp.R;
+import com.example.android.architecture.blueprints.todoapp.addedittask.domain.AddEditTaskEvent;
+import com.example.android.architecture.blueprints.todoapp.addedittask.domain.AddEditTaskMode;
+import com.example.android.architecture.blueprints.todoapp.addedittask.domain.AddEditTaskModel;
+import com.example.android.architecture.blueprints.todoapp.addedittask.view.AddEditTaskModeBundlePacker;
+import com.example.android.architecture.blueprints.todoapp.addedittask.view.AddEditTaskViews;
+import com.example.android.architecture.blueprints.todoapp.data.Task;
+import com.example.android.architecture.blueprints.todoapp.data.TaskBundlePacker;
+import com.example.android.architecture.blueprints.todoapp.data.TaskDetails;
+import com.spotify.mobius.MobiusLoop;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+/** Main UI for the add task screen. Users can enter a task title and description. */
+public class AddEditTaskFragment extends Fragment {
 
-/**
- * Main UI for the add task screen. Users can enter a task title and description.
- */
-public class AddEditTaskFragment extends Fragment implements AddEditTaskContract.View {
+  public static final String TASK_ARGUMENT = "task";
+  public static final String ADD_EDIT_TASK_MODEL_RESTORE_KEY = "add_edit_task_model";
 
-    public static final String ARGUMENT_EDIT_TASK_ID = "EDIT_TASK_ID";
+  private MobiusLoop.Controller<AddEditTaskModel, AddEditTaskEvent> mController;
 
-    private AddEditTaskContract.Presenter mPresenter;
+  public static AddEditTaskFragment newInstanceForTaskCreation() {
+    return new AddEditTaskFragment();
+  }
 
-    private TextView mTitle;
+  public static AddEditTaskFragment newInstanceForTaskUpdate(Task task) {
+    AddEditTaskFragment fragment = new AddEditTaskFragment();
+    Bundle b = new Bundle();
+    b.putBundle("task", TaskBundlePacker.taskToBundle(task));
+    fragment.setArguments(b);
+    return fragment;
+  }
 
-    private TextView mDescription;
+  @Nullable
+  @Override
+  public View onCreateView(
+      LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-    public static AddEditTaskFragment newInstance() {
-        return new AddEditTaskFragment();
+    FloatingActionButton fab = getActivity().findViewById(R.id.fab_edit_task_done);
+    AddEditTaskViews views = new AddEditTaskViews(inflater, container, fab);
+
+    mController =
+        createController(
+            createEffectHandlers(getContext(), this::finishWithResultOk, views::showEmptyTaskError),
+            resolveDefaultModel(savedInstanceState));
+    mController.connect(views);
+
+    setHasOptionsMenu(true);
+    return views.getRootView();
+  }
+
+  @Nullable
+  private AddEditTaskModel resolveDefaultModel(Bundle savedInstanceState) {
+    Bundle arguments = getArguments();
+    if (arguments != null && arguments.containsKey(TASK_ARGUMENT)) {
+      Task task = TaskBundlePacker.taskFromBundle(checkNotNull(arguments.getBundle(TASK_ARGUMENT)));
+      return AddEditTaskModel.builder()
+          .details(task.details())
+          .mode(AddEditTaskMode.update(task.id()))
+          .build();
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        mPresenter.subscribe();
+    if (savedInstanceState != null
+        && savedInstanceState.containsKey(ADD_EDIT_TASK_MODEL_RESTORE_KEY)) {
+      return AddEditTaskModeBundlePacker.addEditTaskModelFromBundle(
+          checkNotNull(savedInstanceState.getBundle(ADD_EDIT_TASK_MODEL_RESTORE_KEY)));
     }
 
-    @Override
-    public void onPause() {
-        super.onPause();
-        mPresenter.unsubscribe();
-    }
+    return AddEditTaskModel.builder()
+        .mode(AddEditTaskMode.create())
+        .details(TaskDetails.DEFAULT)
+        .build();
+  }
 
-    @Override
-    public void setPresenter(@NonNull AddEditTaskContract.Presenter presenter) {
-        mPresenter = checkNotNull(presenter);
-    }
+  @Override
+  public void onSaveInstanceState(Bundle outState) {
+    super.onSaveInstanceState(outState);
+    outState.putBundle(
+        ADD_EDIT_TASK_MODEL_RESTORE_KEY, addEditTaskModelToBundle(mController.getModel()));
+  }
 
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
+  @Override
+  public void onResume() {
+    super.onResume();
+    mController.start();
+  }
 
-        FloatingActionButton fab = getActivity().findViewById(R.id.fab_edit_task_done);
-        fab.setImageResource(R.drawable.ic_done);
-        fab.setOnClickListener(__ -> mPresenter.saveTask(mTitle.getText().toString(),
-                mDescription.getText().toString()));
-    }
+  @Override
+  public void onPause() {
+    mController.stop();
+    super.onPause();
+  }
 
-    @Nullable
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View root = inflater.inflate(R.layout.addtask_frag, container, false);
-        mTitle = root.findViewById(R.id.add_task_title);
-        mDescription = root.findViewById(R.id.add_task_description);
-        setHasOptionsMenu(true);
-        return root;
-    }
-
-    @Override
-    public void showEmptyTaskError() {
-        Snackbar.make(mTitle, getString(R.string.empty_task_message), Snackbar.LENGTH_LONG).show();
-    }
-
-    @Override
-    public void showTasksList() {
-        getActivity().setResult(Activity.RESULT_OK);
-        getActivity().finish();
-    }
-
-    @Override
-    public void setTitle(String title) {
-        mTitle.setText(title);
-    }
-
-    @Override
-    public void setDescription(String description) {
-        mDescription.setText(description);
-    }
-
-    @Override
-    public boolean isActive() {
-        return isAdded();
-    }
+  private void finishWithResultOk() {
+    getActivity().setResult(Activity.RESULT_OK);
+    getActivity().finish();
+  }
 }

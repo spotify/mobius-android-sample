@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 The Android Open Source Project
+ * Copyright 2016, The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,62 +13,60 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.example.android.architecture.blueprints.todoapp.taskdetail;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-
-import com.example.android.architecture.blueprints.todoapp.Injection;
 import com.example.android.architecture.blueprints.todoapp.R;
+import com.example.android.architecture.blueprints.todoapp.data.Task;
+import com.example.android.architecture.blueprints.todoapp.data.TaskBundlePacker;
 import com.example.android.architecture.blueprints.todoapp.util.ActivityUtils;
 
-/**
- * Displays task details screen.
- */
+/** Displays task details screen. */
 public class TaskDetailActivity extends AppCompatActivity {
 
-    public static final String EXTRA_TASK_ID = "TASK_ID";
+  public static final String EXTRA_TASK_ID = "TASK_ID";
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+  public static Intent showTask(Context c, Task task) {
+    Intent i = new Intent(c, TaskDetailActivity.class);
+    i.putExtra(EXTRA_TASK_ID, TaskBundlePacker.taskToBundle(task));
+    return i;
+  }
 
-        setContentView(R.layout.taskdetail_act);
+  @Override
+  protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
 
-        // Set up the toolbar.
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        ActionBar ab = getSupportActionBar();
-        ab.setDisplayHomeAsUpEnabled(true);
-        ab.setDisplayShowHomeEnabled(true);
+    setContentView(R.layout.taskdetail_act);
 
-        // Get the requested task id
-        String taskId = getIntent().getStringExtra(EXTRA_TASK_ID);
+    // Set up the toolbar.
+    Toolbar toolbar = findViewById(R.id.toolbar);
+    setSupportActionBar(toolbar);
+    ActionBar ab = getSupportActionBar();
+    ab.setDisplayHomeAsUpEnabled(true);
+    ab.setDisplayShowHomeEnabled(true);
 
-        TaskDetailFragment taskDetailFragment = (TaskDetailFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.contentFrame);
+    // Get the requested task id
+    Task task = TaskBundlePacker.taskFromBundle(getIntent().getBundleExtra(EXTRA_TASK_ID));
 
-        if (taskDetailFragment == null) {
-            taskDetailFragment = TaskDetailFragment.newInstance(taskId);
+    TaskDetailFragment taskDetailFragment =
+        (TaskDetailFragment) getSupportFragmentManager().findFragmentById(R.id.contentFrame);
 
-            ActivityUtils.addFragmentToActivity(getSupportFragmentManager(),
-                    taskDetailFragment, R.id.contentFrame);
-        }
+    if (taskDetailFragment == null) {
+      taskDetailFragment = TaskDetailFragment.newInstance(task);
 
-        // Create the presenter
-        new TaskDetailPresenter(
-                taskId,
-                Injection.provideTasksRepository(getApplicationContext()),
-                taskDetailFragment,
-                Injection.provideSchedulerProvider());
+      ActivityUtils.addFragmentToActivity(
+          getSupportFragmentManager(), taskDetailFragment, R.id.contentFrame);
     }
+  }
 
-    @Override
-    public boolean onSupportNavigateUp() {
-        onBackPressed();
-        return true;
-    }
+  @Override
+  public boolean onSupportNavigateUp() {
+    onBackPressed();
+    return true;
+  }
 }
