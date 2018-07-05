@@ -35,10 +35,10 @@ import java.util.*
 fun createEffectHandlers(context: Context,
                          showTasksList: Action,
                          showEmptyTaskError: Action):
-        ObservableTransformer<Effect, Event> {
+        ObservableTransformer<AddEditTaskEffect, AddEditTaskEvent> {
 
     val taskSaver = createTaskSaver(context)
-    return RxMobius.subtypeEffectHandler<Effect, Event>()
+    return RxMobius.subtypeEffectHandler<AddEditTaskEffect, AddEditTaskEvent>()
             .addAction(NotifyEmptyTaskNotAllowed::class.java, showEmptyTaskError, mainThread())
             .addAction(Exit::class.java, showTasksList, mainThread())
             .addFunction(CreateTask::class.java, createTaskHandler(taskSaver))
@@ -46,7 +46,7 @@ fun createEffectHandlers(context: Context,
             .build()
 }
 
-internal fun createTaskHandler(taskSaver: (Task) -> AddEditTaskEvent): (CreateTask) -> Event = {
+internal fun createTaskHandler(taskSaver: (Task) -> AddEditTaskEvent): (CreateTask) -> AddEditTaskEvent = {
     val task = Task(UUID.randomUUID().toString(), it.taskDetails)
     val result = taskSaver(task)
     if (result is TaskUpdatedSuccessfully) TaskCreatedSuccessfully else result

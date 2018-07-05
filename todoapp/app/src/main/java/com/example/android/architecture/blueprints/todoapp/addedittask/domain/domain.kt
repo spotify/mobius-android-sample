@@ -29,24 +29,21 @@ data class AddEditTaskModel(val mode: Mode,
         data class Edit(@get:JvmName("id") val id: String) : Mode()
     }
 }
-internal typealias Model = AddEditTaskModel
 
 /** Things we react to **/
 sealed class AddEditTaskEvent
-internal typealias Event = AddEditTaskEvent
-data class TaskDefinitionCompleted(val title: String, val description: String) : Event()
-object TaskCreatedSuccessfully : Event()
-data class TaskCreationFailed(val reason: String) : Event()
-object TaskUpdatedSuccessfully : Event()
-data class TaskUpdateFailed(val reason: String) : Event()
+data class TaskDefinitionCompleted(val title: String, val description: String) : AddEditTaskEvent()
+object TaskCreatedSuccessfully : AddEditTaskEvent()
+data class TaskCreationFailed(val reason: String) : AddEditTaskEvent()
+object TaskUpdatedSuccessfully : AddEditTaskEvent()
+data class TaskUpdateFailed(val reason: String) : AddEditTaskEvent()
 
 /** Things we'll do **/
 sealed class AddEditTaskEffect
-internal typealias Effect = AddEditTaskEffect
-object NotifyEmptyTaskNotAllowed : Effect()
-data class CreateTask(val taskDetails: TaskDetails) : Effect()
-data class SaveTask(val task: Task) : Effect()
-data class Exit(val successful: Boolean) : Effect()
+object NotifyEmptyTaskNotAllowed : AddEditTaskEffect()
+data class CreateTask(val taskDetails: TaskDetails) : AddEditTaskEffect()
+data class SaveTask(val task: Task) : AddEditTaskEffect()
+data class Exit(val successful: Boolean) : AddEditTaskEffect()
 
 
 

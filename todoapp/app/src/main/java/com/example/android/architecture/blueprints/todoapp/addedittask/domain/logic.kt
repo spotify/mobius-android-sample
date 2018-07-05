@@ -28,7 +28,7 @@ import com.spotify.mobius.Next
 import com.spotify.mobius.Next.dispatch
 import com.spotify.mobius.Next.next
 
-fun update(model: Model, event: Event) =
+fun update(model: AddEditTaskModel, event: AddEditTaskEvent) =
         when (event) {
             is TaskDefinitionCompleted -> onTaskDefinitionCompleted(model, event)
             is TaskCreatedSuccessfully -> exitWithSuccess()
@@ -38,8 +38,8 @@ fun update(model: Model, event: Event) =
         }
 
 private fun onTaskDefinitionCompleted(
-        model: Model,
-        definitionCompleted: TaskDefinitionCompleted): Next<Model, Effect> {
+        model: AddEditTaskModel,
+        definitionCompleted: TaskDefinitionCompleted): Next<AddEditTaskModel, AddEditTaskEffect> {
     val (title, description) = definitionCompleted.sanitize()
 
     if (title.isEmpty() && description.isEmpty()) {
@@ -53,11 +53,11 @@ private fun onTaskDefinitionCompleted(
     }
 }
 
-private fun exitWithSuccess(): Next<Model, Effect> {
+private fun exitWithSuccess(): Next<AddEditTaskModel, AddEditTaskEffect> {
     return dispatch(effects(Exit(true)))
 }
 
-private fun exitWithFailure(): Next<Model, Effect> {
+private fun exitWithFailure(): Next<AddEditTaskModel, AddEditTaskEffect> {
     return dispatch(effects(Exit(false)))
 }
 

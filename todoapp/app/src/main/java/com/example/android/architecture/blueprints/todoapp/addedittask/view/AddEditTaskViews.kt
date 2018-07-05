@@ -23,16 +23,16 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import com.example.android.architecture.blueprints.todoapp.R
-import com.example.android.architecture.blueprints.todoapp.addedittask.domain.Event
-import com.example.android.architecture.blueprints.todoapp.addedittask.domain.Model
+import com.example.android.architecture.blueprints.todoapp.addedittask.domain.AddEditTaskEvent
+import com.example.android.architecture.blueprints.todoapp.addedittask.domain.AddEditTaskModel
 import com.example.android.architecture.blueprints.todoapp.addedittask.domain.TaskDefinitionCompleted
-import com.example.android.architecture.blueprints.todoapp.util.onNew
+import com.example.android.architecture.blueprints.todoapp.util.onAccept
 import com.spotify.mobius.Connectable
 import com.spotify.mobius.Connection
 import com.spotify.mobius.functions.Consumer
 
 class AddEditTaskViews(inflater: LayoutInflater, parent: ViewGroup, private val mFab: FloatingActionButton)
-    : Connectable<Model, Event> {
+    : Connectable<AddEditTaskModel, AddEditTaskEvent> {
     val rootView: View = inflater.inflate(R.layout.addtask_frag, parent, false)
     private val mTitle: TextView
     private val mDescription: TextView
@@ -55,18 +55,18 @@ class AddEditTaskViews(inflater: LayoutInflater, parent: ViewGroup, private val 
         mDescription.text = description
     }
 
-    fun render(m: Model) = with(m) {
+    fun render(m: AddEditTaskModel) = with(m) {
         setTitle(details.title)
         setDescription(details.description)
     }
 
-    override fun connect(output: Consumer<Event>): Connection<Model> {
+    override fun connect(output: Consumer<AddEditTaskEvent>): Connection<AddEditTaskModel> {
         mFab.setOnClickListener {
             output.accept(
                     TaskDefinitionCompleted(mTitle.text.toString(), mDescription.text.toString()))
         }
 
-        return onNew<Model> { render(it) }
+        return onAccept<AddEditTaskModel> { render(it) }
                 .onDispose { mFab.setOnClickListener(null) }
     }
 }

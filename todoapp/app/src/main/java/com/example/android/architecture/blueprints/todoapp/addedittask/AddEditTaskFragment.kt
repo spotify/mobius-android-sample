@@ -28,7 +28,6 @@ import com.example.android.architecture.blueprints.todoapp.addedittask.domain.Ad
 import com.example.android.architecture.blueprints.todoapp.addedittask.domain.AddEditTaskModel
 import com.example.android.architecture.blueprints.todoapp.addedittask.domain.AddEditTaskModel.Mode.Add
 import com.example.android.architecture.blueprints.todoapp.addedittask.domain.AddEditTaskModel.Mode.Edit
-import com.example.android.architecture.blueprints.todoapp.addedittask.domain.Model
 import com.example.android.architecture.blueprints.todoapp.addedittask.effecthandlers.createEffectHandlers
 import com.example.android.architecture.blueprints.todoapp.addedittask.view.AddEditTaskViews
 import com.example.android.architecture.blueprints.todoapp.addedittask.view.toAddEditTaskModel
@@ -58,7 +57,7 @@ class AddEditTaskFragment : Fragment() {
         return views.rootView
     }
 
-    private fun resolveDefaultModel(savedInstanceState: Bundle?): Model {
+    private fun resolveDefaultModel(savedInstanceState: Bundle?): AddEditTaskModel {
         if (savedInstanceState != null && savedInstanceState.containsKey(ADD_EDIT_TASK_MODEL_RESTORE_KEY)) {
             return savedInstanceState.getBundle(ADD_EDIT_TASK_MODEL_RESTORE_KEY).toAddEditTaskModel()
         }

@@ -20,15 +20,15 @@
 package com.example.android.architecture.blueprints.todoapp.addedittask.view
 
 import android.os.Bundle
+import com.example.android.architecture.blueprints.todoapp.addedittask.domain.AddEditTaskModel
 import com.example.android.architecture.blueprints.todoapp.addedittask.domain.AddEditTaskModel.Mode
 import com.example.android.architecture.blueprints.todoapp.addedittask.domain.AddEditTaskModel.Mode.Add
 import com.example.android.architecture.blueprints.todoapp.addedittask.domain.AddEditTaskModel.Mode.Edit
-import com.example.android.architecture.blueprints.todoapp.addedittask.domain.Model
 import com.example.android.architecture.blueprints.todoapp.data.TaskBundlePacker
 import com.example.android.architecture.blueprints.todoapp.data.TaskBundlePacker.taskDetailsFromBundle
 import com.google.common.base.Optional
 
-internal fun Model.toBundle() : Bundle {
+internal fun AddEditTaskModel.toBundle() : Bundle {
     val b = Bundle()
     b.putBundle("task_details", TaskBundlePacker.taskDetailsToBundle(details))
     val modeBundle = mode.toBundle()
@@ -41,7 +41,7 @@ private fun Mode.toBundle() = when(this) {
     is Edit -> Optional.of(Bundle().apply { putString("task_id", id) })
 }
 
-internal fun Bundle.toAddEditTaskModel(): Model {
+internal fun Bundle.toAddEditTaskModel(): AddEditTaskModel {
     val details = taskDetailsFromBundle(getBundle("task_details"))
     val mode = getBundle("add_edit_mode").toCreateOrUpdateModes()
     return Model(mode = mode, details = details)

@@ -11,11 +11,11 @@ import org.junit.Test
 
 
 class LogicTest {
-    private var updateSpec: UpdateSpec<Model, Event, Effect> = UpdateSpec(::update)
+    private var updateSpec: UpdateSpec<AddEditTaskModel, AddEditTaskEvent, AddEditTaskEffect> = UpdateSpec(::update)
 
     @Test
     fun completingTaskDefinitionWhenCreatingTaskWithEmptyTitleAndDescriptionDoesNotUpdateState() {
-        val creatingTask = Model(mode = Add, details = TaskDetails())
+        val creatingTask = AddEditTaskModel(mode = Add, details = TaskDetails())
 
         updateSpec
                 .given(creatingTask)
@@ -25,7 +25,7 @@ class LogicTest {
 
     @Test
     fun completingTaskDefinitionWithEmptyTitleAndDescriptionDoesNotUpdateState() {
-        val updatingATask = Model(mode = Edit("123"),
+        val updatingATask = AddEditTaskModel(mode = Edit("123"),
                 details = TaskDetails(title = "T1", description = "This is a task"))
 
         updateSpec
@@ -37,7 +37,7 @@ class LogicTest {
     @Test
     fun tasksCanBeUpdatedWithEmptyTitle() {
         val details = TaskDetails("T1", "This is a task")
-        val updatingATask = Model(mode = Edit("123"),
+        val updatingATask = AddEditTaskModel(mode = Edit("123"),
                 details = details)
 
         val expectedDetails = details.copy(title = "", description = "Hello World")
@@ -54,7 +54,7 @@ class LogicTest {
     @Test
     fun tasksCanBeUpdatedWithEmptyDescription() {
         val details = TaskDetails("T1", "This is a task")
-        val updatingATask = Model(mode = Edit("123"), details = details)
+        val updatingATask = AddEditTaskModel(mode = Edit("123"), details = details)
 
         val updatedDetails = details.copy(title = "Hello Tasks!", description = "")
 
@@ -68,7 +68,7 @@ class LogicTest {
 
     @Test
     fun tasksCanBeCreatedWithEmptyTitle() {
-        val creatingATask = Model(mode = Add, details = TaskDetails.DEFAULT)
+        val creatingATask = AddEditTaskModel(mode = Add, details = TaskDetails.DEFAULT)
 
         val expectedDetails = TaskDetails(title = "", description = "Hello World")
         updateSpec
@@ -81,7 +81,7 @@ class LogicTest {
 
     @Test
     fun tasksCanBeCreatedWithEmptyDescription() {
-        val creatingATask = Model(mode = Add, details = TaskDetails.DEFAULT)
+        val creatingATask = AddEditTaskModel(mode = Add, details = TaskDetails.DEFAULT)
 
         val expectedDetails = TaskDetails("Hello Tasks!", "")
         updateSpec
@@ -94,7 +94,7 @@ class LogicTest {
 
     @Test
     fun taskCreationSuccessShouldExit() {
-        val creatingATask = Model(mode = Add,
+        val creatingATask = AddEditTaskModel(mode = Add,
                 details = TaskDetails("hello", "world"))
 
         updateSpec
@@ -105,7 +105,7 @@ class LogicTest {
 
     @Test
     fun taskUpdateSuccessShouldExit() {
-        val updatingATask = Model(mode = Edit("1234"),
+        val updatingATask = AddEditTaskModel(mode = Edit("1234"),
                 details = TaskDetails("hello", "world"))
 
         updateSpec
@@ -116,7 +116,7 @@ class LogicTest {
 
     @Test
     fun taskCreationFailureShouldExit() {
-        val creatingATask = Model(mode = Add,
+        val creatingATask = AddEditTaskModel(mode = Add,
                 details = TaskDetails("hello", "world"))
 
         updateSpec
@@ -127,7 +127,7 @@ class LogicTest {
 
     @Test
     fun taskUpdateFailureShouldExit() {
-        val updatingATask = Model(mode = Edit("1234"),
+        val updatingATask = AddEditTaskModel(mode = Edit("1234"),
                 details = TaskDetails("hello", "world"))
 
         updateSpec
