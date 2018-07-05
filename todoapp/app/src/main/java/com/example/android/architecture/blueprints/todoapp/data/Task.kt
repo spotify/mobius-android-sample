@@ -16,8 +16,15 @@
  * limitations under the License.
  * -/-/-
  */
+package com.example.android.architecture.blueprints.todoapp.data
 
-@ParametersAreNonnullByDefault
-package com.example.android.architecture.blueprints.todoapp.addedittask.effecthandlers;
+data class Task(@get:JvmName("id") val id: String,
+                @get:JvmName("details") val details: TaskDetails) {
+    fun complete() = copy(details = details.copy(completed = true))
+    fun activate() = copy(details = details.copy(completed = false))
 
-import javax.annotation.ParametersAreNonnullByDefault;
+    companion object {
+        @JvmStatic
+        fun create(id: String, details: TaskDetails) = Task(id, details)
+    }
+}
