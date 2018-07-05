@@ -30,11 +30,10 @@ import io.reactivex.ObservableTransformer
 
 fun createController(
         effectHandlers: ObservableTransformer<AddEditTaskEffect, AddEditTaskEvent>,
-        defaultModel: AddEditTaskModel): MobiusLoop.Controller<AddEditTaskModel, AddEditTaskEvent> {
-    return MobiusAndroid.controller(createLoop(effectHandlers), defaultModel)
-}
+        defaultModel: AddEditTaskModel): MobiusLoop.Controller<AddEditTaskModel, AddEditTaskEvent> =
+        MobiusAndroid.controller(createLoop(effectHandlers), defaultModel)
 
-private fun createLoop(effectHandlers: ObservableTransformer<AddEditTaskEffect, AddEditTaskEvent>): MobiusLoop.Factory<AddEditTaskModel, AddEditTaskEvent, AddEditTaskEffect> {
-    return loopFactory(::update, effectHandlers)
-            .logger(AndroidLogger.tag("Add/Edit Tasks"))
-}
+private fun createLoop(effectHandlers: ObservableTransformer<AddEditTaskEffect, AddEditTaskEvent>)
+        : MobiusLoop.Factory<AddEditTaskModel, AddEditTaskEvent, AddEditTaskEffect> =
+        loopFactory(::update, effectHandlers)
+                .logger(AndroidLogger.tag("Add/Edit Tasks"))

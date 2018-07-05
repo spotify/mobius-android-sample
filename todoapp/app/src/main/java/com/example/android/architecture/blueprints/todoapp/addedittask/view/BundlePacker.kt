@@ -28,23 +28,20 @@ import com.example.android.architecture.blueprints.todoapp.data.TaskBundlePacker
 import com.example.android.architecture.blueprints.todoapp.data.TaskBundlePacker.taskDetailsFromBundle
 import com.google.common.base.Optional
 
-internal fun AddEditTaskModel.toBundle() : Bundle {
-    val b = Bundle()
-    b.putBundle("task_details", TaskBundlePacker.taskDetailsToBundle(details))
-    val modeBundle = mode.toBundle()
-    if (modeBundle.isPresent) b.putBundle("add_edit_mode", modeBundle.get())
-    return b
+internal fun AddEditTaskModel.toBundle() : Bundle = Bundle().apply {
+    putBundle("task_details", TaskBundlePacker.taskDetailsToBundle(details))
+    mode.toBundle()?.let { putBundle("add_edit_mode", it) }
 }
 
 private fun Mode.toBundle() = when(this) {
-    Add -> Optional.absent()
-    is Edit -> Optional.of(Bundle().apply { putString("task_id", id) })
+    Add -> null
+    is Edit -> Bundle().apply { putString("task_id", id) }
 }
 
 internal fun Bundle.toAddEditTaskModel(): AddEditTaskModel {
     val details = taskDetailsFromBundle(getBundle("task_details"))
     val mode = getBundle("add_edit_mode").toCreateOrUpdateModes()
-    return Model(mode = mode, details = details)
+    return AddEditTaskModel(mode = mode, details = details)
 }
 
 internal fun Bundle?.toCreateOrUpdateModes() = if (this == null) Add else Edit(getString("task_id"))

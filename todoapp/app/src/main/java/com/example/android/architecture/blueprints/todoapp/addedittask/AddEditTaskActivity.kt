@@ -38,25 +38,21 @@ class AddEditTaskActivity : AppCompatActivity() {
         setContentView(R.layout.addtask_act)
 
         // Set up the toolbar.
-        val toolbar = findViewById<Toolbar>(R.id.toolbar)
-        if (toolbar != null) {
-            setSupportActionBar(toolbar)
-            supportActionBar?.let {
-                it.setDisplayHomeAsUpEnabled(true)
-                it.setDisplayShowHomeEnabled(true)
+        findViewById<Toolbar>(R.id.toolbar)?.run {
+            setSupportActionBar(this)
+            supportActionBar?.run {
+                setDisplayHomeAsUpEnabled(true)
+                setDisplayShowHomeEnabled(true)
             }
         }
 
-        val task: Task?
-        val extras = intent.extras
-        if (extras != null && extras.containsKey("task_to_edit")) {
-            val bundledTask = checkNotNull(extras.getBundle("task_to_edit"))
-            task = TaskBundlePacker.taskFromBundle(bundledTask)
+        val task = intent.extras?.getBundle("task_to_edit")?.let { TaskBundlePacker.taskFromBundle(it) }
+        if (task != null) {
             setToolbarTitle(R.string.edit_task)
         } else {
-            task = null
             setToolbarTitle(R.string.add_task)
         }
+
 
         if (supportFragmentManager.findFragmentById(R.id.contentFrame) == null) {
 
@@ -70,7 +66,7 @@ class AddEditTaskActivity : AppCompatActivity() {
 
     private fun edit(task: Task) = AddEditTaskFragment.newInstanceForTaskUpdate(task)
 
-    private fun setToolbarTitle(stringResource: Int) = supportActionBar?.let { it.setTitle(stringResource) }
+    private fun setToolbarTitle(stringResource: Int) = supportActionBar?.run { setTitle(stringResource) }
 
     override fun onSupportNavigateUp(): Boolean {
         onBackPressed()

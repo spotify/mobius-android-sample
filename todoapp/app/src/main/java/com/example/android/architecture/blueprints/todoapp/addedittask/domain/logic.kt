@@ -53,12 +53,10 @@ private fun onTaskDefinitionCompleted(
     }
 }
 
-private fun exitWithSuccess(): Next<AddEditTaskModel, AddEditTaskEffect> {
-    return dispatch(effects(Exit(true)))
-}
+private fun exitWithSuccess(): Next<AddEditTaskModel, AddEditTaskEffect> =
+        dispatch(effects(Exit(true)))
 
-private fun exitWithFailure(): Next<AddEditTaskModel, AddEditTaskEffect> {
-    return dispatch(effects(Exit(false)))
-}
+private fun exitWithFailure(): Next<AddEditTaskModel, AddEditTaskEffect> =
+        dispatch(effects(Exit(false)))
 
 fun TaskDefinitionCompleted.sanitize() = this.title.trim() to this.description.trim()

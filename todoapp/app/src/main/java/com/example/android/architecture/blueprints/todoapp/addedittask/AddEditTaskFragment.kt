@@ -65,10 +65,10 @@ class AddEditTaskFragment : Fragment() {
         val arguments = arguments
         if (arguments != null && arguments.containsKey(TASK_ARGUMENT)) {
             val (id, details) = TaskBundlePacker.taskFromBundle(arguments.getBundle(TASK_ARGUMENT))
-            return Model(details = details, mode = Edit(id))
+            return AddEditTaskModel(details = details, mode = Edit(id))
         }
 
-        return Model(mode = Add)
+        return AddEditTaskModel(mode = Add)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
