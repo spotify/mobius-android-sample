@@ -21,4 +21,4 @@ class PartialConnection<T>(val onModelChange: (T) -> Unit) {
         }
     }
 }
-fun <T> onNew(onModelChange: (T) -> Unit) : PartialConnection<T> = PartialConnection(onModelChange)
+fun <T> onAccept(onModelChange: (T) -> Unit) : PartialConnection<T> = PartialConnection(onModelChange)
