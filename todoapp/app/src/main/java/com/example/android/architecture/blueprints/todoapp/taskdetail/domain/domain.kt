@@ -27,11 +27,6 @@ sealed class TaskDetailEvent {
         @JvmStatic fun completeTaskRequested() = CompleteTaskRequested
         @JvmStatic fun activateTaskRequested() = ActivateTaskRequested
         @JvmStatic fun editTaskRequested() = EditTaskRequested
-        @JvmStatic fun taskDeleted() = TaskDeleted
-        @JvmStatic fun taskMarkedComplete() = TaskMarkedComplete
-        @JvmStatic fun taskMarkedActive() = TaskMarkedActive
-        @JvmStatic fun taskSaveFailed() = TaskSaveFailed
-        @JvmStatic fun taskDeletionFailed() = TaskDeletionFailed
     }
 }
 object DeleteTaskRequested : TaskDetailEvent()
@@ -47,11 +42,11 @@ object TaskDeletionFailed : TaskDetailEvent()
 
 /** Things we'll do **/
 sealed class TaskDetailEffect
-data class DeleteTask(@get:JvmName("task") val task: Task) : TaskDetailEffect()
-data class SaveTask(@get:JvmName("task") val task: Task) : TaskDetailEffect()
+data class DeleteTask(val task: Task) : TaskDetailEffect()
+data class SaveTask(val task: Task) : TaskDetailEffect()
 object NotifyTaskMarkedComplete : TaskDetailEffect()
 object NotifyTaskMarkedActive : TaskDetailEffect()
 object NotifyTaskSaveFailed : TaskDetailEffect()
 object NotifyTaskDeletionFailed : TaskDetailEffect()
-data class OpenTaskEditor(@get:JvmName("task") val task: Task) : TaskDetailEffect()
+data class OpenTaskEditor(val task: Task) : TaskDetailEffect()
 object Exit : TaskDetailEffect()
