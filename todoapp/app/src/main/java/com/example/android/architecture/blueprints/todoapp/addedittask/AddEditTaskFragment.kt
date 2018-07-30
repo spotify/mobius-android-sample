@@ -49,7 +49,7 @@ class AddEditTaskFragment : Fragment() {
         val views = AddEditTaskViews(inflater, container!!, fab)
 
         mController = createController(
-                createEffectHandlers(context!!, Action { finishWithResultOk() }, Action { views.showEmptyTaskError() }),
+                createEffectHandlers(context!!, this::finishWithResultOk, views::showEmptyTaskError),
                 resolveDefaultModel(savedInstanceState))
         mController.connect(views)
 

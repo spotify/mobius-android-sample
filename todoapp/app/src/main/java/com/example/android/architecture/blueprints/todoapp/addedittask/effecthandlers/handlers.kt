@@ -16,8 +16,6 @@
  * limitations under the License.
  * -/-/-
  */
-@file:JvmName("AddEditTaskEffectHandlers")
-
 package com.example.android.architecture.blueprints.todoapp.addedittask.effecthandlers
 
 import android.content.Context
@@ -25,24 +23,24 @@ import com.example.android.architecture.blueprints.todoapp.addedittask.domain.*
 import com.example.android.architecture.blueprints.todoapp.data.Task
 import com.example.android.architecture.blueprints.todoapp.data.source.local.TasksLocalDataSource
 import com.example.android.architecture.blueprints.todoapp.data.source.remote.TasksRemoteDataSource
+import com.example.android.architecture.blueprints.todoapp.util.SubtypeEffectHandlerBuilder
 import com.example.android.architecture.blueprints.todoapp.util.schedulers.SchedulerProvider
-import com.spotify.mobius.rx2.RxMobius
 import io.reactivex.ObservableTransformer
 import io.reactivex.android.schedulers.AndroidSchedulers.mainThread
-import io.reactivex.functions.Action
 import java.util.*
 
 fun createEffectHandlers(context: Context,
-                         showTasksList: Action,
-                         showEmptyTaskError: Action):
+                         showTasksList: () -> Unit,
+                         showEmptyTaskError: () -> Unit):
         ObservableTransformer<AddEditTaskEffect, AddEditTaskEvent> {
 
     val taskSaver = createTaskSaver(context)
-    return RxMobius.subtypeEffectHandler<AddEditTaskEffect, AddEditTaskEvent>()
-            .addAction(NotifyEmptyTaskNotAllowed::class.java, showEmptyTaskError, mainThread())
-            .addAction(Exit::class.java, showTasksList, mainThread())
-            .addFunction(CreateTask::class.java, createTaskHandler(taskSaver))
-            .addFunction(SaveTask::class.java, saveTaskHandler(taskSaver))
+
+    return SubtypeEffectHandlerBuilder<AddEditTaskEffect, AddEditTaskEvent>()
+            .addAction<NotifyEmptyTaskNotAllowed>(showEmptyTaskError, mainThread())
+            .addAction<Exit>(showTasksList, mainThread())
+            .addFunction<CreateTask>(createTaskHandler(taskSaver))
+            .addFunction<SaveTask>(saveTaskHandler(taskSaver))
             .build()
 }
 
