@@ -43,6 +43,15 @@ class TasksLocalDataSource private constructor(
   private val databaseHelper: BriteDatabase
   private val taskMapperFunction: (Cursor) -> (Task)
 
+  init {
+    checkNotNull(context, "context cannot be null")
+    checkNotNull(schedulerProvider, "scheduleProvider cannot be null")
+    val dbHelper = TasksDbHelper(context)
+    val sqlBrite = SqlBrite.Builder().build()
+    databaseHelper = sqlBrite.wrapDatabaseHelper(dbHelper, schedulerProvider.io())
+    taskMapperFunction = { this.getTask(it) }
+  }
+
   override fun getTasks(): Flowable<List<Task>> {
     val projection = listOf(
         TaskEntry.COLUMN_NAME_ENTRY_ID,
@@ -55,15 +64,6 @@ class TasksLocalDataSource private constructor(
         .createQuery(TaskEntry.TABLE_NAME, sql)
         .mapToList(taskMapperFunction)
         .toFlowable(BackpressureStrategy.BUFFER)
-  }
-
-  init {
-    checkNotNull(context, "context cannot be null")
-    checkNotNull(schedulerProvider, "scheduleProvider cannot be null")
-    val dbHelper = TasksDbHelper(context)
-    val sqlBrite = SqlBrite.Builder().build()
-    databaseHelper = sqlBrite.wrapDatabaseHelper(dbHelper, schedulerProvider.io())
-    taskMapperFunction = { this.getTask(it) }
   }
 
   private fun getTask(c: Cursor): Task = with(c) {
