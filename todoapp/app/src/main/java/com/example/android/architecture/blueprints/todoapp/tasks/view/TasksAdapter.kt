@@ -44,7 +44,8 @@ internal class TasksAdapter : BaseAdapter() {
     override fun getItemId(i: Int) = i.toLong()
 
     override fun getView(i: Int, view: View?, viewGroup: ViewGroup): View {
-        return view ?: LayoutInflater.from(viewGroup.context).inflate(R.layout.task_item, viewGroup, false)
+        return view
+                ?: LayoutInflater.from(viewGroup.context).inflate(R.layout.task_item, viewGroup, false)
                 .apply {
                     val (title, completed, backgroundDrawableId, id) = getItem(i)
 
@@ -66,10 +67,9 @@ internal class TasksAdapter : BaseAdapter() {
                     setBackgroundDrawable(viewGroup.context.resources.getDrawable(backgroundDrawableId))
 
                     setOnClickListener {
-                        mItemListener?. run { onTaskClick(id) }
+                        mItemListener?.run { onTaskClick(id) }
                     }
                 }
-            }
     }
 
     interface TaskItemListener {
