@@ -18,13 +18,13 @@
  */
 package com.example.android.architecture.blueprints.todoapp.util
 
+import com.spotify.mobius.Connectable
 import com.spotify.mobius.Connection
 import com.spotify.mobius.Next
 import com.spotify.mobius.Update
+import com.spotify.mobius.functions.Consumer
 import com.spotify.mobius.rx2.RxMobius
 import io.reactivex.ObservableTransformer
-import io.reactivex.Scheduler
-import io.reactivex.functions.Consumer
 
 private fun <M, E, F> updateWrapper(u: (M, E) -> Next<M, F>): Update<M, E, F> = Update { m: M, e: E -> u(m, e) }
 
@@ -44,40 +44,15 @@ class PartialConnection<T>(val onModelChange: (T) -> Unit) {
 
 fun <T> onAccept(onModelChange: (T) -> Unit): PartialConnection<T> = PartialConnection(onModelChange)
 
-class SubtypeEffectHandlerBuilder<F, E> {
-    val builder: RxMobius.SubtypeEffectHandlerBuilder<F, E> = RxMobius.subtypeEffectHandler()
+fun <I, J, O> Connectable<I, O>.contramap(block: (J) -> I) = ContramapConnectable(block, this)
 
-    inline fun <reified G : F> addTransformer(
-            transformer: ObservableTransformer<G, E>) =
-            apply { builder.addTransformer(G::class.java, transformer) }
-
-
-    inline fun <reified G : F> addAction(
-            crossinline block: () -> Unit,
-            scheduler: Scheduler? = null) =
-            apply {
-                scheduler?.run { builder.addAction(G::class.java, { block() }, this) }
-                        ?: builder.addAction(G::class.java) { block() }
-            }
-
-    inline fun <reified G : F> addConsumer(
-            crossinline block: (G) -> Unit,
-            scheduler: Scheduler? = null) =
-            apply {
-                scheduler?.run { builder.addConsumer(G::class.java, { block(it) }, this) }
-                        ?: builder.addConsumer(G::class.java) { block(it) }
-            }
-
-    inline fun <reified G : F> addFunction(
-            crossinline block: (G) -> E,
-            scheduler: Scheduler? = null) =
-            apply {
-                scheduler?.run { builder.addFunction(G::class.java, { block(it) }, this) }
-                        ?: builder.addFunction(G::class.java) { block(it) }
-            }
-
-    fun withFatalErrorHandler(block: (ObservableTransformer<out F, E>) -> Consumer<Throwable>) =
-            apply { builder.withFatalErrorHandler { block(it) } }
-
-    fun build(): ObservableTransformer<F, E> = builder.build()
+class ContramapConnectable<I, J, O> (
+        private val map: (J) -> I,
+        private val delegate: Connectable<I, O>) : Connectable<J, O> {
+    override fun connect(output: Consumer<O>): Connection<J> {
+        val connection = delegate.connect(output)
+        return onAccept<J> { connection.accept(map(it))}
+                .onDispose { connection.dispose() }
+    }
 }
+
