@@ -64,12 +64,11 @@ class TasksFragment : Fragment() {
         return mViews.rootView
     }
 
-    private fun resolveDefaultModel(savedInstanceState: Bundle?): TasksListModel {
-        return if (savedInstanceState != null)
+    private fun resolveDefaultModel(savedInstanceState: Bundle?) =
+        savedInstanceState?. let {
             tasksListModelFromBundle(savedInstanceState.getBundle("model")!!)
-        else
-            TasksListModel()
-    }
+        } ?: TasksListModel()
+
 
     override fun onResume() {
         super.onResume()

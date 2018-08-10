@@ -30,17 +30,17 @@ import io.reactivex.ObservableTransformer
 fun createController(
         effectHandler: ObservableTransformer<TasksListEffect, TasksListEvent>,
         eventSource: EventSource<TasksListEvent>,
-        defaultModel: TasksListModel): MobiusLoop.Controller<TasksListModel, TasksListEvent> {
+        defaultModel: TasksListModel): MobiusLoop.Controller<TasksListModel, TasksListEvent> =
+    MobiusAndroid.controller(
+            createLoop(eventSource, effectHandler),
+            defaultModel)
 
-    return MobiusAndroid.controller(createLoop(eventSource, effectHandler), defaultModel)
-}
 
 private fun createLoop(
         eventSource: EventSource<TasksListEvent>,
-        effectHandler: ObservableTransformer<TasksListEffect, TasksListEvent>): MobiusLoop.Factory<TasksListModel, TasksListEvent, TasksListEffect> {
-
-    return loopFactory(::update, effectHandler)
+        effectHandler: ObservableTransformer<TasksListEffect, TasksListEvent>)
+        : MobiusLoop.Factory<TasksListModel, TasksListEvent, TasksListEffect> =
+    loopFactory(::update, effectHandler)
             .init(::init)
             .eventSource(eventSource)
             .logger(AndroidLogger.tag("TasksList"))
-}

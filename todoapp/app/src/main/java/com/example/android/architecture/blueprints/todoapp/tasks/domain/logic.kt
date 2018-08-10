@@ -28,7 +28,6 @@ import com.spotify.mobius.First.first
 import com.spotify.mobius.Next
 import com.spotify.mobius.Next.*
 
-
 fun init(model: TasksListModel) : First<TasksListModel, TasksListEffect> =
         model.tasks?.let { first(model, effects(LoadTasks as TasksListEffect)) }
                 ?: first(model.copy(loading = true), effects(RefreshTasks, LoadTasks))
@@ -57,25 +56,22 @@ private fun onNewTaskClicked(): Next<TasksListModel, TasksListEffect> =
 
 private fun onNavigateToTaskDetailsRequested(model: TasksListModel,
                                              event: NavigateToTaskDetailsRequested)
-        : Next<TasksListModel, TasksListEffect> =
-        model.findTaskById(event.taskId)?.let {
-            dispatch<TasksListModel, TasksListEffect>(effects(NavigateToTaskDetails(it)))
-        }
-        ?: throw IllegalStateException("Task does not exist")
+        : Next<TasksListModel, TasksListEffect> {
+    val task = model.findTaskById(event.taskId)
+    return dispatch(effects(NavigateToTaskDetails(task)))
+}
 
 private fun onTaskCompleted(model: TasksListModel,
-                            event: TaskMarkedComplete): Next<TasksListModel, TasksListEffect> =
-        model.findTaskIndexById(event.taskId)
-                .run {
-                    updateTask(copy(second = second.complete()), model, MARKED_COMPLETE)
-                }
+                            event: TaskMarkedComplete): Next<TasksListModel, TasksListEffect> {
+    val entry = model.findTaskIndexById(event.taskId)
+    return updateTask(entry.copy(second = entry.second.complete()), model, MARKED_COMPLETE)
+}
 
 private fun onTaskActivated(model: TasksListModel,
-                            event: TaskMarkedActive): Next<TasksListModel, TasksListEffect> =
-        model.findTaskIndexById(event.taskId)
-                .run {
-                    updateTask(copy(second = second.activate()), model, MARKED_ACTIVE)
-                }
+                            event: TaskMarkedActive): Next<TasksListModel, TasksListEffect> {
+    val entry = model.findTaskIndexById(event.taskId)
+    return updateTask(entry.copy(second = entry.second.activate()), model, MARKED_ACTIVE)
+}
 
 private fun updateTask(entry: TaskEntry,
                        model: TasksListModel,
@@ -116,7 +112,7 @@ private fun onTasksLoadingFailed(model: TasksListModel): Next<TasksListModel, Ta
         = next(model.copy(loading = false), effects(ShowFeedback(LOADING_ERROR)))
 
 
-fun TasksListModel.findTaskIndexById(id: String) =
+private fun TasksListModel.findTaskIndexById(id: String) =
         tasks?.indexOfFirst { it.id == id }
             ?.let {
                 if (it == -1) throw IllegalArgumentException("Task does not exist")
@@ -125,13 +121,9 @@ fun TasksListModel.findTaskIndexById(id: String) =
             ?: throw IllegalStateException("Tasks have not been loaded yet")
 
 
-fun TasksListModel.findTaskById(id: String) =
-        findTaskIndexById(id).let {
-            if (it.first == -1) null
-            else tasks?.get(it.first)
-        }
+private fun TasksListModel.findTaskById(id: String) = findTaskIndexById(id).second
 
-fun TasksListModel.withEntry(entry: TaskEntry) =
+private fun TasksListModel.withEntry(entry: TaskEntry) =
         tasks?.let {
             if (entry.first < 0 || entry.first >= it.size) throw IllegalArgumentException("Index out of bounds")
             else copy(tasks = it.change(entry))

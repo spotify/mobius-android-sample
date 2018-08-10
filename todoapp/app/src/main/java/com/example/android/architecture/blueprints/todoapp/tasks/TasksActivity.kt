@@ -21,7 +21,6 @@ import android.os.Bundle
 import android.support.design.widget.NavigationView
 import android.support.v4.view.GravityCompat
 import android.support.v4.widget.DrawerLayout
-import android.support.v7.app.ActionBar
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.view.MenuItem
@@ -40,7 +39,6 @@ class TasksActivity : AppCompatActivity() {
         // Set up the toolbar.
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
-        val ab = supportActionBar
         supportActionBar?.apply {
             setHomeAsUpIndicator(R.drawable.ic_menu)
             setDisplayHomeAsUpEnabled(true)
@@ -49,17 +47,11 @@ class TasksActivity : AppCompatActivity() {
         // Set up the navigation drawer.
         mDrawerLayout = findViewById(R.id.drawer_layout)
         mDrawerLayout!!.setStatusBarBackground(R.color.colorPrimaryDark)
-        val navigationView = findViewById<NavigationView>(R.id.nav_view)
-        if (navigationView != null) {
-            setupDrawerContent(navigationView)
-        }
+        findViewById<NavigationView>(R.id.nav_view)?.run { setupDrawerContent(this) }
 
-        var tasksFragment: TasksFragment? = supportFragmentManager.findFragmentById(R.id.contentFrame) as TasksFragment?
-        if (tasksFragment == null) {
-            // Create the fragment
-            tasksFragment = TasksFragment.newInstance()
+        if (supportFragmentManager.findFragmentById(R.id.contentFrame) == null) {
             ActivityUtils.addFragmentToActivity(
-                    supportFragmentManager, tasksFragment, R.id.contentFrame)
+                    supportFragmentManager, TasksFragment.newInstance(), R.id.contentFrame)
         }
     }
 
@@ -77,8 +69,6 @@ class TasksActivity : AppCompatActivity() {
     private fun setupDrawerContent(navigationView: NavigationView) {
         navigationView.setNavigationItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
-                R.id.list_navigation_menu_item -> {
-                }
                 R.id.statistics_navigation_menu_item -> {
                     val intent = Intent(this@TasksActivity, StatisticsActivity::class.java)
                     startActivity(intent)
