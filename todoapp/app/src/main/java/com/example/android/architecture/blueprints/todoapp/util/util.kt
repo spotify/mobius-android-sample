@@ -14,10 +14,15 @@ sealed class Either<L, R> {
     }
 }
 
-fun <L, R, T> Either<L, R>.fold(
-        l: (L) -> T,
-        r: (R) -> T) =
-        when(this) {
-            is Either.Left -> l(this.value)
-            is Either.Right -> r(this.value)
-        }
+/**
+ * When isn't exhaustive when used as a statement. This is a workaround that allows us to make sure
+ * it is exhaustive.
+ *
+ * Do exhaustive when(sealedClass) {
+ *  is A -> doSomething()
+ *  is B -> doSomethingElse()
+ * }
+ */
+object Do {
+    infix inline fun exhaustive(t: Any) = t
+}

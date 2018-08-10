@@ -28,6 +28,7 @@ import android.widget.ListView
 import android.widget.TextView
 import com.example.android.architecture.blueprints.todoapp.R
 import com.example.android.architecture.blueprints.todoapp.tasks.domain.*
+import com.example.android.architecture.blueprints.todoapp.util.Do
 import com.example.android.architecture.blueprints.todoapp.util.onAccept
 import com.spotify.mobius.Connectable
 import com.spotify.mobius.Connection
@@ -157,11 +158,10 @@ class TasksViews(
         // Make sure setRefreshing() is called after the layout is done with everything else.
         mSwipeRefreshLayout.isRefreshing = value.loading
         mFilteringLabelView.setText(value.filterLabel)
-        when(value.viewState) {
+        Do exhaustive when(value.viewState) {
             is HasTasks -> showTasks(value.viewState.tasks)
             AwaitingTasks -> showNoTasksViewState()
             is EmptyTasks -> showEmptyTaskState(value.viewState.viewData)
-            else -> throw RuntimeException("Unhandled case")
         }
     }
 }
