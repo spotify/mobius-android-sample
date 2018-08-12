@@ -18,12 +18,12 @@
  */
 package com.example.android.architecture.blueprints.todoapp.statistics.domain;
 
-import static com.example.android.architecture.blueprints.todoapp.statistics.domain.StatisticsEffect.loadTasks;
-import static com.example.android.architecture.blueprints.todoapp.statistics.domain.StatisticsEvent.tasksLoaded;
-import static com.example.android.architecture.blueprints.todoapp.statistics.domain.StatisticsEvent.tasksLoadingFailed;
-import static com.example.android.architecture.blueprints.todoapp.statistics.domain.StatisticsState.failed;
-import static com.example.android.architecture.blueprints.todoapp.statistics.domain.StatisticsState.loaded;
-import static com.example.android.architecture.blueprints.todoapp.statistics.domain.StatisticsState.loading;
+import static com.example.android.architecture.blueprints.todoapp.statistics.StatisticsEffect.loadTasks;
+import static com.example.android.architecture.blueprints.todoapp.statistics.StatisticsEvent.tasksLoaded;
+import static com.example.android.architecture.blueprints.todoapp.statistics.StatisticsEvent.tasksLoadingFailed;
+import static com.example.android.architecture.blueprints.todoapp.statistics.StatisticsState.failed;
+import static com.example.android.architecture.blueprints.todoapp.statistics.StatisticsState.loaded;
+import static com.example.android.architecture.blueprints.todoapp.statistics.StatisticsState.loading;
 import static com.google.common.collect.ImmutableList.of;
 import static com.spotify.mobius.test.InitSpec.assertThatFirst;
 import static com.spotify.mobius.test.NextMatchers.hasModel;
@@ -32,6 +32,10 @@ import static com.spotify.mobius.test.UpdateSpec.assertThatNext;
 
 import com.example.android.architecture.blueprints.todoapp.data.Task;
 import com.example.android.architecture.blueprints.todoapp.data.TaskDetails;
+import com.example.android.architecture.blueprints.todoapp.statistics.StatisticsEffect;
+import com.example.android.architecture.blueprints.todoapp.statistics.StatisticsEvent;
+import com.example.android.architecture.blueprints.todoapp.statistics.StatisticsLogic;
+import com.example.android.architecture.blueprints.todoapp.statistics.StatisticsState;
 import com.spotify.mobius.test.FirstMatchers;
 import com.spotify.mobius.test.InitSpec;
 import com.spotify.mobius.test.UpdateSpec;

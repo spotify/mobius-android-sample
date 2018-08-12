@@ -36,7 +36,7 @@
         <activity android:name="com.example.android.architecture.blueprints.todoapp.taskdetail.TaskDetailActivity" />
         <activity android:name="com.example.android.architecture.blueprints.todoapp.addedittask.AddEditTaskActivity" />
         <activity
-            android:name="com.example.android.architecture.blueprints.todoapp.statistics.StatisticsActivity"
+            android:name="com.example.android.architecture.blueprints.todoapp.statistics.ui.StatisticsActivity"
             android:parentActivityName=".tasks.TasksActivity"
             tools:ignore="UnusedAttribute">
             <!-- Parent activity meta-data to support 4.0 and lower -->
