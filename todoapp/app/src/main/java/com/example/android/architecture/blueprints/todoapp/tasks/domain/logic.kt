@@ -123,7 +123,7 @@ private fun TasksListModel.findTaskIndexById(id: String) =
 
 private fun TasksListModel.findTaskById(id: String) = findTaskIndexById(id).second
 
-private fun TasksListModel.withEntry(entry: TaskEntry) =
+fun TasksListModel.withEntry(entry: TaskEntry) =
         tasks?.let {
             if (entry.first < 0 || entry.first >= it.size) throw IllegalArgumentException("Index out of bounds")
             else copy(tasks = it.change(entry))
