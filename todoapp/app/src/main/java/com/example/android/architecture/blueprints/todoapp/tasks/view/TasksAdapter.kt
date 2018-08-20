@@ -55,7 +55,7 @@ internal class TasksAdapter : BaseAdapter() {
                         isChecked = completed
                         setOnClickListener {
                             mItemListener?.run {
-                                if (!completed) {
+                                if (isChecked) {
                                     onCompleteTaskClick(id)
                                 } else {
                                     onActivateTaskClick(id)
