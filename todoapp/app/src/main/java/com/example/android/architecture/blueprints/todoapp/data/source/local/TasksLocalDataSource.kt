@@ -22,11 +22,14 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
-import android.text.TextUtils
 import com.example.android.architecture.blueprints.todoapp.data.Task
 import com.example.android.architecture.blueprints.todoapp.data.TaskDetails
 import com.example.android.architecture.blueprints.todoapp.data.source.TasksDataSource
-import com.example.android.architecture.blueprints.todoapp.data.source.local.TasksPersistenceContract.TaskEntry
+import com.example.android.architecture.blueprints.todoapp.data.source.local.TasksPersistenceContract.TaskEntry.Companion.COLUMN_NAME_COMPLETED
+import com.example.android.architecture.blueprints.todoapp.data.source.local.TasksPersistenceContract.TaskEntry.Companion.COLUMN_NAME_DESCRIPTION
+import com.example.android.architecture.blueprints.todoapp.data.source.local.TasksPersistenceContract.TaskEntry.Companion.COLUMN_NAME_ENTRY_ID
+import com.example.android.architecture.blueprints.todoapp.data.source.local.TasksPersistenceContract.TaskEntry.Companion.COLUMN_NAME_TITLE
+import com.example.android.architecture.blueprints.todoapp.data.source.local.TasksPersistenceContract.TaskEntry.Companion.TABLE_NAME
 import com.example.android.architecture.blueprints.todoapp.util.schedulers.BaseSchedulerProvider
 import com.google.common.base.Optional
 import com.squareup.sqlbrite2.BriteDatabase
@@ -44,8 +47,6 @@ class TasksLocalDataSource private constructor(
   private val taskMapperFunction: (Cursor) -> (Task)
 
   init {
-    checkNotNull(context, "context cannot be null")
-    checkNotNull(schedulerProvider, "scheduleProvider cannot be null")
     val dbHelper = TasksDbHelper(context)
     val sqlBrite = SqlBrite.Builder().build()
     databaseHelper = sqlBrite.wrapDatabaseHelper(dbHelper, schedulerProvider.io())
@@ -54,40 +55,43 @@ class TasksLocalDataSource private constructor(
 
   override fun getTasks(): Flowable<List<Task>> {
     val projection = listOf(
-        TaskEntry.COLUMN_NAME_ENTRY_ID,
-        TaskEntry.COLUMN_NAME_TITLE,
-        TaskEntry.COLUMN_NAME_DESCRIPTION,
-        TaskEntry.COLUMN_NAME_COMPLETED
-    )
-    val sql = "SELECT ${TextUtils.join(",", projection)} FROM ${TaskEntry.TABLE_NAME}"
+        COLUMN_NAME_ENTRY_ID,
+        COLUMN_NAME_TITLE,
+        COLUMN_NAME_DESCRIPTION,
+        COLUMN_NAME_COMPLETED
+    ).joinToString(",")
+    val sql = "SELECT $projection FROM $TABLE_NAME"
     return databaseHelper
-        .createQuery(TaskEntry.TABLE_NAME, sql)
+        .createQuery(TABLE_NAME, sql)
         .mapToList(taskMapperFunction)
         .toFlowable(BackpressureStrategy.BUFFER)
   }
 
-  private fun getTask(c: Cursor): Task = with(c) {
-    val itemId = getString(c.getColumnIndexOrThrow(TaskEntry.COLUMN_NAME_ENTRY_ID))
-    val title = getString(c.getColumnIndexOrThrow(TaskEntry.COLUMN_NAME_TITLE))
-    val description = getString(c.getColumnIndexOrThrow(TaskEntry.COLUMN_NAME_DESCRIPTION))
-    val completed = getInt(c.getColumnIndexOrThrow(TaskEntry.COLUMN_NAME_COMPLETED)) == 1
+  private fun getTask(c: Cursor): Task {
+    fun indexString(column: String) = c.getString(c.getColumnIndexOrThrow(column))
+    fun indexInt(column: String) = c.getInt(c.getColumnIndexOrThrow(column))
+
+    val itemId = indexString(COLUMN_NAME_ENTRY_ID)
+    val title = indexString(COLUMN_NAME_TITLE)
+    val description = indexString(COLUMN_NAME_DESCRIPTION)
+    val completed = indexInt(COLUMN_NAME_COMPLETED) == 1
     val details = TaskDetails.builder().title(title).description(description).completed(completed).build()
-    return@with Task.create(itemId, details)
+    return Task.create(itemId, details)
   }
 
   override fun getTask(taskId: String): Flowable<Optional<Task>> {
     val projection = listOf(
-        TaskEntry.COLUMN_NAME_ENTRY_ID,
-        TaskEntry.COLUMN_NAME_TITLE,
-        TaskEntry.COLUMN_NAME_DESCRIPTION,
-        TaskEntry.COLUMN_NAME_COMPLETED
-    )
+        COLUMN_NAME_ENTRY_ID,
+        COLUMN_NAME_TITLE,
+        COLUMN_NAME_DESCRIPTION,
+        COLUMN_NAME_COMPLETED
+    ).joinToString(",")
     val sql =
-            "SELECT ${TextUtils.join(",", projection)} " +
-            "FROM ${TaskEntry.TABLE_NAME} " +
-            "WHERE ${TaskEntry.COLUMN_NAME_ENTRY_ID} LIKE ?"
+            "SELECT $projection " +
+            "FROM $TABLE_NAME " +
+            "WHERE $COLUMN_NAME_ENTRY_ID LIKE ?"
     return databaseHelper
-        .createQuery(TaskEntry.TABLE_NAME, sql, taskId)
+        .createQuery(TABLE_NAME, sql, taskId)
         .mapToOneOrDefault(
             { Optional.of(taskMapperFunction(it)) }, Optional.absent<Task>())
         .toFlowable(BackpressureStrategy.BUFFER)
@@ -96,22 +100,22 @@ class TasksLocalDataSource private constructor(
   override fun saveTask(task: Task) {
     checkNotNull(task)
     val values = ContentValues().apply {
-      put(TaskEntry.COLUMN_NAME_ENTRY_ID, task.id)
-      put(TaskEntry.COLUMN_NAME_TITLE, task.details.title)
-      put(TaskEntry.COLUMN_NAME_DESCRIPTION, task.details.description)
-      put(TaskEntry.COLUMN_NAME_COMPLETED, task.details.completed)
+      put(COLUMN_NAME_ENTRY_ID, task.id)
+      put(COLUMN_NAME_TITLE, task.details.title)
+      put(COLUMN_NAME_DESCRIPTION, task.details.description)
+      put(COLUMN_NAME_COMPLETED, task.details.completed)
     }
-    databaseHelper.insert(TaskEntry.TABLE_NAME, values, SQLiteDatabase.CONFLICT_REPLACE)
+    databaseHelper.insert(TABLE_NAME, values, SQLiteDatabase.CONFLICT_REPLACE)
   }
 
   override fun deleteAllTasks() {
-    databaseHelper.delete(TaskEntry.TABLE_NAME, null)
+    databaseHelper.delete(TABLE_NAME, null)
   }
 
   override fun deleteTask(taskId: String) {
-    val selection = TaskEntry.COLUMN_NAME_ENTRY_ID + " LIKE ?"
+    val selection = "$COLUMN_NAME_ENTRY_ID LIKE ?"
     val selectionArgs = arrayOf(taskId)
-    databaseHelper.delete(TaskEntry.TABLE_NAME, selection, *selectionArgs)
+    databaseHelper.delete(TABLE_NAME, selection, *selectionArgs)
   }
 
   companion object {

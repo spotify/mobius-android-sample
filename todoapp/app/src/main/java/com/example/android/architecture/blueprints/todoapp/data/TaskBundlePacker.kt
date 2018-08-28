@@ -53,13 +53,9 @@ object TaskBundlePacker {
     putBoolean(TaskDetailsBundleIdentifiers.STATUS, details.completed)
   }
 
-  fun taskDetailsFromBundle(b: Bundle): TaskDetails {
-    val title = checkNotNull(b.getString(TaskDetailsBundleIdentifiers.TITLE))
-    val description = checkNotNull(b.getString(TaskDetailsBundleIdentifiers.DESCRIPTION))
-    return TaskDetails.builder()
-        .title(title)
-        .description(description)
-        .completed(b.getBoolean(TaskDetailsBundleIdentifiers.STATUS))
-        .build()
-  }
+  fun taskDetailsFromBundle(b: Bundle) = TaskDetails.builder()
+      .title(b.getString(TaskDetailsBundleIdentifiers.TITLE))
+      .description(b.getString(TaskDetailsBundleIdentifiers.DESCRIPTION))
+      .completed(b.getBoolean(TaskDetailsBundleIdentifiers.STATUS))
+      .build()
 }
