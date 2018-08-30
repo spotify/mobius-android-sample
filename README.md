@@ -68,7 +68,7 @@ Very High. For the following reasons:
 
 #### UI testing
 UI testing can be split into two categories of tests:
-* Presenatation: Since presentation logic is also defined as a Pure function, testing it becomes very simple.
+* Presentation: Since presentation logic is also defined as a Pure function, testing it becomes very simple.
 * View: Same as TODO-MVP-RXJAVA. This implementation does not change anything with regards to integration/end to end testing.
 
 ### Maintainability
@@ -85,6 +85,7 @@ High.
 ## External contributors
 Mobius Implementation:
 * [Ahmed Nawara](https://github.com/anawara)
+* [Marcus Forsell Stahre](https://github.com/togi)
 * [Petter Måhlén](https://github.com/pettermahlen)
 
 Original Implementation:
