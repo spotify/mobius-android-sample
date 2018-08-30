@@ -56,7 +56,6 @@ import io.reactivex.subjects.PublishSubject;
 public class TasksFragment extends Fragment {
 
   private MobiusLoop.Controller<TasksListModel, TasksListEvent> mController;
-  private BehaviorSubject<TasksListEvent> mOnActivityResult = BehaviorSubject.create();
   private PublishSubject<TasksListEvent> mMenuEvents = PublishSubject.create();
   private TasksViews mViews;
   private DeferredEventSource<TasksListEvent> mEventSource = new DeferredEventSource<>();
