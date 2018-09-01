@@ -15,6 +15,8 @@
  */
 package com.example.android.architecture.blueprints.todoapp.tasks.view
 
+import android.support.v4.content.ContextCompat
+import android.support.v4.view.ViewCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -44,8 +46,10 @@ internal class TasksAdapter : BaseAdapter() {
     override fun getItemId(i: Int) = i.toLong()
 
     override fun getView(i: Int, view: View?, viewGroup: ViewGroup): View {
-        return view
+        val rowView: View = view
                 ?: LayoutInflater.from(viewGroup.context).inflate(R.layout.task_item, viewGroup, false)
+
+        return rowView
                 .apply {
                     val (title, completed, backgroundDrawableId, id) = getItem(i)
 
@@ -64,7 +68,9 @@ internal class TasksAdapter : BaseAdapter() {
                         }
                     }
 
-                    setBackgroundDrawable(viewGroup.context.resources.getDrawable(backgroundDrawableId))
+                    ViewCompat.setBackground(
+                            rowView,
+                            ContextCompat.getDrawable(viewGroup.context, backgroundDrawableId))
 
                     setOnClickListener {
                         mItemListener?.run { onTaskClick(id) }
