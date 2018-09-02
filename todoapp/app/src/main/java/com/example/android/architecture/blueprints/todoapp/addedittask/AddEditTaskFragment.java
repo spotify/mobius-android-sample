@@ -120,6 +120,12 @@ public class AddEditTaskFragment extends Fragment {
     super.onPause();
   }
 
+  @Override
+  public void onDestroyView() {
+    mController.disconnect();
+    super.onDestroyView();
+  }
+
   private void finishWithResultOk() {
     getActivity().setResult(Activity.RESULT_OK);
     getActivity().finish();
