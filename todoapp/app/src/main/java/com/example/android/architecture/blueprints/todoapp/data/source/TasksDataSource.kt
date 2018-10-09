@@ -14,28 +14,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.example.android.architecture.blueprints.todoapp.data.source;
+package com.example.android.architecture.blueprints.todoapp.data.source
 
-import android.support.annotation.NonNull;
-import com.example.android.architecture.blueprints.todoapp.data.Task;
-import com.google.common.base.Optional;
-import io.reactivex.Flowable;
-import java.util.List;
+import com.example.android.architecture.blueprints.todoapp.data.Task
+import com.google.common.base.Optional
+import io.reactivex.Flowable
 
 /**
  * Main entry point for accessing allTasks data.
  *
- * <p>
+ *
+ *
  */
-public interface TasksDataSource {
+interface TasksDataSource {
 
-  Flowable<List<Task>> getTasks();
+  fun getTasks(): Flowable<List<Task>>
 
-  Flowable<Optional<Task>> getTask(@NonNull String taskId);
+  fun getTask(taskId: String): Flowable<Optional<Task>>
 
-  void saveTask(@NonNull Task task);
+  fun saveTask(task: Task)
 
-  void deleteAllTasks();
+  fun deleteAllTasks()
 
-  void deleteTask(@NonNull String taskId);
+  fun deleteTask(taskId: String)
 }

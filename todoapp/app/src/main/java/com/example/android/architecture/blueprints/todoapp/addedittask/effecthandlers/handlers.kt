@@ -55,7 +55,7 @@ internal fun saveTaskHandler(taskSaver: (Task) -> AddEditTaskEvent): (SaveTask) 
 }
 
 internal fun createTaskSaver(context: Context): (Task) -> AddEditTaskEvent {
-    val remoteSource = TasksRemoteDataSource.getInstance()
+    val remoteSource = TasksRemoteDataSource
     val localSource = TasksLocalDataSource.getInstance(context, SchedulerProvider.getInstance())
 
     return {

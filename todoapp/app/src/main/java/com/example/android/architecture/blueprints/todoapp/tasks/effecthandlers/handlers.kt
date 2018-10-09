@@ -41,7 +41,7 @@ fun createEffectHandler(
         showAddTask: () -> Unit,
         showTaskDetails: (Task) -> Unit): ObservableTransformer<TasksListEffect, TasksListEvent> {
 
-    val remoteSource = TasksRemoteDataSource.getInstance()
+    val remoteSource = TasksRemoteDataSource
     val localSource = TasksLocalDataSource.getInstance(context, SchedulerProvider.getInstance())
 
     return SubtypeEffectHandlerBuilder<TasksListEffect, TasksListEvent>()
@@ -61,7 +61,7 @@ internal fun refreshTasksHandler(
     ObservableTransformer {
         it.flatMapSingle {
             remoteSource
-                    .tasks
+                    .getTasks()
                     .singleOrError()
                     .map { it.toList() }
                     .map { Either.right<Throwable, List<Task>>(it) }
@@ -85,7 +85,7 @@ internal fun loadTasksHandler(dataSource: TasksDataSource)
     ObservableTransformer {
         it.flatMap {
             dataSource
-                    .tasks
+                    .getTasks()
                     .toObservable()
                     .take(1)
                     .map<TasksListEvent> { TasksLoaded(it) }

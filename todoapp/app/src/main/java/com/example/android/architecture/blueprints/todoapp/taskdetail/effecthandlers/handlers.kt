@@ -34,7 +34,7 @@ import io.reactivex.functions.Action
 import io.reactivex.functions.Consumer
 
 fun createEffectHandlers(view: TaskDetailViews, context: Context, dismiss: Action, launchEditor: Consumer<Task>): ObservableTransformer<TaskDetailEffect, TaskDetailEvent> {
-    val remoteSource = TasksRemoteDataSource.getInstance()
+    val remoteSource = TasksRemoteDataSource
     val localSource = TasksLocalDataSource.getInstance(context, SchedulerProvider.getInstance())
 
     return SubtypeEffectHandlerBuilder<TaskDetailEffect, TaskDetailEvent>()
