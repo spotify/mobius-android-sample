@@ -24,9 +24,6 @@ import com.example.android.architecture.blueprints.todoapp.data.Task
 sealed class TaskDetailEvent {
     companion object {
         @JvmStatic fun deleteTaskRequested() = DeleteTaskRequested
-        @JvmStatic fun completeTaskRequested() = CompleteTaskRequested
-        @JvmStatic fun activateTaskRequested() = ActivateTaskRequested
-        @JvmStatic fun editTaskRequested() = EditTaskRequested
     }
 }
 object DeleteTaskRequested : TaskDetailEvent()

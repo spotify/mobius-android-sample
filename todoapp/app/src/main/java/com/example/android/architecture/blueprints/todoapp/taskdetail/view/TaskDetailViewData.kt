@@ -16,8 +16,8 @@
  * limitations under the License.
  * -/-/-
  */
+package com.example.android.architecture.blueprints.todoapp.taskdetail.view
 
-@ParametersAreNonnullByDefault
-package com.example.android.architecture.blueprints.todoapp.taskdetail.view;
+data class TaskDetailViewData(val title: TextViewData, val description: TextViewData, val completedChecked: Boolean)
 
-import javax.annotation.ParametersAreNonnullByDefault;
+data class TextViewData(val visibility: Int, val text: String)

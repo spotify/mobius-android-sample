@@ -16,15 +16,15 @@
  * limitations under the License.
  * -/-/-
  */
-package com.example.android.architecture.blueprints.todoapp.taskdetail.view;
+package com.example.android.architecture.blueprints.todoapp.taskdetail.view
 
-public interface TaskDetailViewActions {
+interface TaskDetailViewActions {
 
-  void showTaskMarkedComplete();
+    fun showTaskMarkedComplete()
 
-  void showTaskMarkedActive();
+    fun showTaskMarkedActive()
 
-  void showTaskSavingFailed();
+    fun showTaskSavingFailed()
 
-  void showTaskDeletionFailed();
+    fun showTaskDeletionFailed()
 }
