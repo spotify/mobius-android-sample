@@ -18,8 +18,8 @@
  */
 package com.example.android.architecture.blueprints.todoapp.tasks.view;
 
-import android.support.annotation.DrawableRes;
-import android.support.annotation.StringRes;
+import androidx.annotation.DrawableRes;
+import androidx.annotation.StringRes;
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
 import com.spotify.dataenum.DataEnum;

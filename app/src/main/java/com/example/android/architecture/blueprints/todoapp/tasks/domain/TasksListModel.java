@@ -20,7 +20,7 @@ package com.example.android.architecture.blueprints.todoapp.tasks.domain;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import com.example.android.architecture.blueprints.todoapp.data.Task;
 import com.google.auto.value.AutoValue;
 import com.google.common.base.Optional;

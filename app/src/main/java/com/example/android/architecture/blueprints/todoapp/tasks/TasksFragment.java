@@ -28,10 +28,10 @@ import static com.spotify.mobius.extras.Connectables.contramap;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.Fragment;
-import android.support.v7.widget.PopupMenu;
+import androidx.annotation.Nullable;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import androidx.fragment.app.Fragment;
+import androidx.appcompat.widget.PopupMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -49,7 +49,6 @@ import com.example.android.architecture.blueprints.todoapp.tasks.view.DeferredEv
 import com.example.android.architecture.blueprints.todoapp.tasks.view.TasksListViewDataMapper;
 import com.example.android.architecture.blueprints.todoapp.tasks.view.TasksViews;
 import com.spotify.mobius.MobiusLoop;
-import io.reactivex.subjects.BehaviorSubject;
 import io.reactivex.subjects.PublishSubject;
 
 /** Display a grid of {@link Task}s. User can choose to view all, active or completed allTasks. */

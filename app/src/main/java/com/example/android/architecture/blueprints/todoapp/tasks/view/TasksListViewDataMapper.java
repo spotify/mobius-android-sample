@@ -25,7 +25,7 @@ import static com.example.android.architecture.blueprints.todoapp.tasks.view.Vie
 import static com.google.common.collect.ImmutableList.copyOf;
 import static com.google.common.collect.Lists.transform;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import com.example.android.architecture.blueprints.todoapp.R;
 import com.example.android.architecture.blueprints.todoapp.data.Task;
 import com.example.android.architecture.blueprints.todoapp.tasks.TasksFragment;

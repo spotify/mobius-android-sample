@@ -19,8 +19,8 @@ package com.example.android.architecture.blueprints.todoapp.taskdetail.view;
 import static com.example.android.architecture.blueprints.todoapp.taskdetail.domain.TaskDetailEvent.activateTaskRequested;
 import static com.example.android.architecture.blueprints.todoapp.taskdetail.domain.TaskDetailEvent.completeTaskRequested;
 
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;

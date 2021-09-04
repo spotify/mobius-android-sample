@@ -4,6 +4,8 @@ import com.github.sherter.googlejavaformatgradleplugin.VerifyGoogleJavaFormat
 buildscript {
     repositories {
         google()
+        mavenCentral()
+        //noinspection JcenterRepositoryObsolete
         jcenter()
     }
     dependencies {
@@ -22,6 +24,8 @@ plugins {
 allprojects {
     repositories {
         google()
+        mavenCentral()
+        //noinspection JcenterRepositoryObsolete
         jcenter()
     }
 }

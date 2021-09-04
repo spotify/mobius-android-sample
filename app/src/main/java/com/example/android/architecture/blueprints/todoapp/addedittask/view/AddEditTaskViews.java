@@ -18,8 +18,8 @@ package com.example.android.architecture.blueprints.todoapp.addedittask.view;
 
 import static com.example.android.architecture.blueprints.todoapp.addedittask.domain.AddEditTaskEvent.taskDefinitionCompleted;
 
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;

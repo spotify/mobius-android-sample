@@ -36,7 +36,7 @@ import static com.spotify.mobius.test.NextMatchers.hasModel;
 import static com.spotify.mobius.test.NextMatchers.hasNothing;
 import static com.spotify.mobius.test.UpdateSpec.assertThatNext;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import com.example.android.architecture.blueprints.todoapp.data.Task;
 import com.example.android.architecture.blueprints.todoapp.data.TaskDetails;
 import com.spotify.mobius.test.UpdateSpec;
